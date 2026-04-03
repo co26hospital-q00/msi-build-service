@@ -3,6 +3,26 @@
 
 ---
 
+## [2026-04-03] — Build pipeline hoàn chỉnh: từ push code đến file MSI trên storage
+
+### Tính năng hoạt động đầy đủ
+- Hệ thống đã có thể nhận job từ Firebase, clone code, build file `.msi` và upload lên tất cả storage targets trong một luồng tự động hoàn chỉnh
+- Khi máy build nhận được job mới: tự động clone (hoặc cập nhật) code từ GitHub, đọc version từ file `.exe`, build MSI với Advanced Installer, rồi upload song song lên OneDrive / S3 / Google Drive / NAS
+- Nếu file MSI đã tồn tại trên storage → bỏ qua bước upload đó, không upload lại
+- Mỗi bước (clone, build, từng storage upload) đều được ghi trạng thái lên Firebase real-time
+
+### Cải thiện độ tin cậy
+- Clone repo: nếu cache bị hỏng sẽ tự xóa và clone lại từ đầu mà không cần can thiệp thủ công
+- Build: có giới hạn thời gian tối đa (mặc định 5 phút) — nếu `advinst.exe` bị treo sẽ tự kill và báo lỗi
+- Upload: nếu 1 storage target bị lỗi, các target khác vẫn tiếp tục bình thường
+- File `.aip` gốc trong repo không bao giờ bị sửa — service clone ra bản riêng để build
+
+### Cấu hình dự án (cho developer)
+- Thêm file `.aip.json` vào repo để chỉ định file `.aip`, `mainExe`, tên MSI output, v.v.
+- Không bắt buộc — service tự tìm file `.aip` và `.exe` nếu không có `.aip.json`
+
+---
+
 ## [2026-04-03] — Phiên bản đầu tiên: Thiết kế hệ thống tự động build MSI
 
 ### Tính năng mới
